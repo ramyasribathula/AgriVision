@@ -6,3 +6,4 @@ Werkzeug>=3.0,<4
 Pillow>=10,<12
 requests>=2.31,<3
 earthengine-api>=1.5,<2
+gunicorn
