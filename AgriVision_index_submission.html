@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgriVision - Smart Farming Assistant</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f5f8f6;
+    color: #263238;
+    padding-bottom: 80px;
+}
+
+/* HEADER */
+.header {
+    background: white;
+    padding: 18px 22px;
+    border-bottom: 1px solid #e3e8e5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #247a38;
+}
+
+.logo-icon {
+    font-size: 28px;
+}
+
+.lang-btn {
+    border: none;
+    background: #eef6ef;
+    color: #247a38;
+    padding: 9px 14px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+/* MAIN */
+.container {
+    max-width: 850px;
+    margin: auto;
+    padding: 18px;
+}
+
+/* FARMER GREETING */
+.greeting {
+    margin: 12px 0 20px;
+}
+
+.greeting h2 {
+    font-size: 25px;
+    margin-bottom: 5px;
+}
+
+.greeting p {
+    color: #68746d;
+}
+
+/* CROP SELECTOR */
+.section-title {
+    font-size: 19px;
+    font-weight: bold;
+    margin: 22px 0 12px;
+}
+
+.crop-row {
+    display: flex;
+    gap: 13px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+}
+
+.crop {
+    min-width: 88px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.crop-circle {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: #edf5ed;
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 36px;
+    border: 3px solid transparent;
+}
+
+.crop.active .crop-circle {
+    border-color: #3b9146;
+    background: #f7fbf7;
+}
+
+.crop span {
+    display: block;
+    margin-top: 7px;
+    font-size: 14px;
+}
+
+/* QUICK FEATURES */
+.quick-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.quick-card {
+    background: white;
+    border: 1px solid #e4e9e6;
+    border-radius: 13px;
+    padding: 17px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.quick-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,.08);
+}
+
+.quick-icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.quick-card b {
+    display: block;
+    font-size: 14px;
+}
+
+.quick-card small {
+    color: #718078;
+}
+
+/* CROP DOCTOR */
+.doctor-card {
+    background: white;
+    border-radius: 17px;
+    padding: 20px;
+    margin-top: 18px;
+    border: 1px solid #e2e8e4;
+}
+
+.doctor-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 21px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.diagnosis-flow {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    margin: 15px 0;
+}
+
+.flow-item {
+    flex: 1;
+    font-size: 13px;
+}
+
+.flow-icon {
+    font-size: 35px;
+    margin-bottom: 7px;
+}
+
+.arrow {
+    color: #8ca094;
+    font-size: 25px;
+    padding-top: 12px;
+}
+
+.camera-btn {
+    width: 100%;
+    border: none;
+    background: #287f38;
+    color: white;
+    padding: 15px;
+    border-radius: 28px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.camera-btn:hover {
+    background: #216c2f;
+}
+
+/* FARMING GUIDE */
+.guide-card {
+    background: #fff8df;
+    border-radius: 17px;
+    padding: 20px;
+    margin-top: 18px;
+}
+
+.guide-card h3 {
+    margin-bottom: 6px;
+}
+
+.guide-card p {
+    color: #6c6650;
+    margin-bottom: 15px;
+}
+
+.guide-btn {
+    border: none;
+    background: #247a38;
+    color: white;
+    padding: 11px 20px;
+    border-radius: 22px;
+    font-weight: bold;
+}
+
+/* ANALYTICS */
+.analytics-title {
+    margin-top: 24px;
+}
+
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.analysis-card {
+    background: white;
+    border-radius: 14px;
+    padding: 17px 10px;
+    border: 1px solid #e3e9e5;
+    cursor: pointer;
+}
+
+.analysis-card .icon {
+    font-size: 28px;
+}
+
+.analysis-card h4 {
+    margin: 8px 0 4px;
+}
+
+.analysis-card p {
+    font-size: 13px;
+    color: #707b75;
+}
+
+/* WEATHER */
+.weather {
+    background: linear-gradient(135deg, #e8f5ff, #f6fbff);
+    border-radius: 17px;
+    margin-top: 18px;
+    padding: 20px;
+    border: 1px solid #dcecf7;
+}
+
+.weather-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.temperature {
+    font-size: 38px;
+    font-weight: bold;
+}
+
+.weather-info {
+    margin-top: 14px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+}
+
+/* RECENT */
+.recent {
+    margin-top: 20px;
+}
+
+.recent-card {
+    background: white;
+    border-radius: 14px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border: 1px solid #e4e9e6;
+}
+
+.recent-photo {
+    width: 70px;
+    height: 70px;
+    border-radius: 10px;
+    background: #e7eee8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+}
+
+/* VOICE */
+.voice {
+    position: fixed;
+    right: 20px;
+    bottom: 92px;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    border: none;
+    background: #287f38;
+    color: white;
+    font-size: 25px;
+    box-shadow: 0 5px 18px rgba(0,0,0,.2);
+    cursor: pointer;
+    z-index: 999;
+}
+
+/* BOTTOM NAV */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 68px;
+    background: white;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 998;
+}
+
+.nav-item {
+    text-align: center;
+    color: #78837c;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.nav-item.active {
+    color: #287f38;
+    font-weight: bold;
+}
+
+.nav-icon {
+    font-size: 23px;
+    margin-bottom: 2px;
+}
+
+/* RESPONSIVE */
+@media(max-width:650px) {
+
+    .quick-grid,
+    .analytics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .container {
+        padding: 14px;
+    }
+
+    .greeting h2 {
+        font-size: 22px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header class="header">
+    <div class="logo">
+        <span class="logo-icon">🌱</span>
+        <span>AgriVision</span>
+    </div>
+
+    <button class="lang-btn" onclick="changeLanguage()">
+        తెలుగు / EN
+    </button>
+</header>
+
+<!-- ================= FARMING GUIDE SCREEN ================= -->
+
+<section id="farmingGuideScreen"
+         style="
+         display:none;
+         padding:30px 20px 100px;
+         max-width:900px;
+         margin:auto;
+         background:#f7faf7;
+         min-height:70vh;
+         ">
+
+    <button onclick="closeFarmingGuide()"
+            style="
+            background:#2e7d32;
+            color:white;
+            border:none;
+            padding:12px 20px;
+            border-radius:25px;
+            font-size:16px;
+            cursor:pointer;
+            margin-bottom:25px;
+            ">
+        ← Back
+    </button>
+
+    <h1 style="color:#24752b;">
+        🌾 Farming Guide
+    </h1>
+
+    <p style="color:#667085;">
+        Step-by-step farming guidance for your selected crop.
+    </p>
+
+    <!-- CROP SELECTOR -->
+
+    <div style="
+        display:flex;
+        gap:12px;
+        flex-wrap:wrap;
+        margin:25px 0;
+        ">
+
+        <button class="guideCropBtn"
+                onclick="showGuide('Jasmine')">
+            🌼 Jasmine
+        </button>
+
+        <button class="guideCropBtn"
+                onclick="showGuide('Paddy')">
+            🌾 Paddy
+        </button>
+
+        <button class="guideCropBtn"
+                onclick="showGuide('Groundnut')">
+            🥜 Groundnut
+        </button>
+
+        <button class="guideCropBtn"
+                onclick="showGuide('Chilli')">
+            🌶️ Chilli
+        </button>
+
+        <button class="guideCropBtn"
+                onclick="showGuide('Onion')">
+            🧅 Onion
+        </button>
+
+    </div>
+
+    <!-- GUIDE RESULT -->
+
+    <div id="guideResult"
+         style="
+         background:white;
+         border-radius:20px;
+         padding:25px;
+         box-shadow:0 4px 18px rgba(0,0,0,0.08);
+         ">
+
+        <h2>🌱 Select a crop</h2>
+
+        <p>
+            Choose your crop above to see the farming steps.
+        </p>
+
+    </div>
+
+</section>
+
+
+<main class="container">
+
+    <!-- GREETING -->
+    <section class="greeting">
+        <h2>Hello, Farmer 👋</h2>
+        <p>Let's keep your crops healthy today.</p>
+    </section>
+
+
+    <!-- YOUR CROPS -->
+    <div class="section-title">Your Crops</div>
+
+    <div class="crop-row">
+
+        <div class="crop active" onclick="selectCrop('Jasmine')">
+            <div class="crop-circle">🌼</div>
+            <span>Jasmine</span>
+        </div>
+
+        <div class="crop" onclick="selectCrop('Paddy')">
+            <div class="crop-circle">🌾</div>
+            <span>Paddy</span>
+        </div>
+
+        <div class="crop" onclick="selectCrop('Groundnut')">
+            <div class="crop-circle">🥜</div>
+            <span>Groundnut</span>
+        </div>
+
+        <div class="crop" onclick="selectCrop('Chilli')">
+            <div class="crop-circle">🌶️</div>
+            <span>Chilli</span>
+        </div>
+
+        <div class="crop" onclick="selectCrop('Onion')">
+            <div class="crop-circle">🧅</div>
+            <span>Onion</span>
+        </div>
+
+    </div>
+
+
+    <!-- QUICK ACTIONS -->
+    <div class="section-title">Quick Actions</div>
+
+    <div class="quick-grid">
+
+        <div class="quick-card" onclick="openFeature('cropDoctor')">
+            <div class="quick-icon">🩺</div>
+            <b>Crop Doctor</b>
+            <small>Check crop problem</small>
+        </div>
+
+        <div class="quick-card" onclick="openFeature('fertilizer')">
+            <div class="quick-icon">🧪</div>
+            <b>Fertilizer</b>
+            <small>Find right nutrients</small>
+        </div>
+
+        <div class="quick-card" onclick="openFeature('pest')">
+            <div class="quick-icon">🐛</div>
+            <b>Pests & Diseases</b>
+            <small>Identify problems</small>
+        </div>
+
+        <div class="quick-card" onclick="openFeature('weather')">
+            <div class="quick-icon">🌦️</div>
+            <b>Weather</b>
+            <small>Today's forecast</small>
+        </div>
+
+        <div class="quick-card" onclick="openFeature('water')">
+            <div class="quick-icon">💧</div>
+            <b>Water Management</b>
+            <small>Check water needs</small>
+        </div>
+
+    </div>
+
+
+    <!-- CROP DOCTOR -->
+    <section class="doctor-card">
+
+        <div class="doctor-title">
+            🩺
+            <span>Heal Your Crop</span>
+        </div>
+
+        <div class="diagnosis-flow">
+
+            <div class="flow-item">
+                <div class="flow-icon">📷</div>
+                <b>Take a photo</b>
+            </div>
+
+            <div class="arrow">›</div>
+
+            <div class="flow-item">
+                <div class="flow-icon">🔬</div>
+                <b>Get diagnosis</b>
+            </div>
+
+            <div class="arrow">›</div>
+
+            <div class="flow-item">
+                <div class="flow-icon">🌱</div>
+                <b>Get solution</b>
+            </div>
+
+        </div>
+
+        <button class="camera-btn" onclick="startCropDoctor()">
+            📷 Check My Crop
+        </button>
+
+    </section>
+
+    <!-- SMART ANALYSIS -->
+    <div class="section-title analytics-title">
+        Smart Crop Analysis
+    </div>
+
+    <div class="analytics-grid">
+
+        <div class="analysis-card"
+             onclick="openFeature('ndvi')">
+
+            <div class="icon">🛰️</div>
+
+            <h4>NDVI</h4>
+
+            <p>
+                Monitor vegetation health
+                using satellite data.
+            </p>
+
+        </div>
+
+
+        <div class="analysis-card"
+             onclick="openFeature('savi')">
+
+            <div class="icon">🌿</div>
+
+            <h4>SAVI</h4>
+
+            <p>
+                Analyse vegetation where
+                soil affects NDVI.
+            </p>
+
+        </div>
+
+
+        <div class="analysis-card"
+             onclick="openFeature('waterStress')">
+
+            <div class="icon">💧</div>
+
+            <h4>Water Stress</h4>
+
+            <p>
+                Detect possible crop
+                water stress.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- WEATHER -->
+    <section class="weather">
+
+        <div class="weather-top">
+
+            <div>
+                <b>Today's Weather</b>
+                <p>Farm location</p>
+            </div>
+
+            <div class="temperature">
+                ☀️ 33°C
+            </div>
+
+        </div>
+
+        <div class="weather-info">
+
+            <span>💧 Humidity 68%</span>
+            <span>💨 Wind 12 km/h</span>
+            <span>🌧️ Rain 20%</span>
+
+        </div>
+
+    </section>
+
+
+    <!-- RECENT DIAGNOSIS -->
+    <section class="recent">
+
+        <div class="section-title">
+            Recent Crop Check
+        </div>
+
+        <div class="recent-card">
+
+            <div class="recent-photo">
+                🌿
+            </div>
+
+            <div>
+                <b>Jasmine crop</b>
+
+                <p style="margin-top:5px;color:#68746d;">
+                    No recent diagnosis
+                </p>
+
+                <small style="color:#247a38;">
+                    Tap to check your crop
+                </small>
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- VOICE ASSISTANT -->
+<button class="voice"
+        onclick="startVoiceAssistant()"
+        title="Voice Assistant">
+    🎙️
+</button>
+
+
+<!-- BOTTOM NAVIGATION -->
+<nav class="bottom-nav">
+
+    <div class="nav-item active"
+         onclick="goHome()">
+        <div class="nav-icon">🏠</div>
+        Home
+    </div>
+
+    <div class="nav-item"
+         onclick="openFeature('cropDoctor')">
+        <div class="nav-icon">🩺</div>
+        Crop Doctor
+    </div>
+
+    <div class="nav-item"
+         onclick="openFeature('farmingGuide')">
+        <div class="nav-icon">📖</div>
+        Guide
+    </div>
+
+    <div class="nav-item"
+         onclick="openFeature('ndvi')">
+        <div class="nav-icon">🛰️</div>
+        Analysis
+    </div>
+
+    <div class="nav-item"
+         onclick="openFeature('profile')">
+        <div class="nav-icon">👤</div>
+        You
+    </div>
+
+</nav>
+
+
+<script>
+
+/* SELECT CROP */
+
+let selectedCrop = "Jasmine";
+
+function selectCrop(crop) {
+
+    selectedCrop = crop;
+
+    document.querySelectorAll(".crop")
+        .forEach(item => item.classList.remove("active"));
+
+    event.currentTarget.classList.add("active");
+
+    console.log("Selected crop:", crop);
+
+}
+
+
+/* FEATURE ROUTER */
+
+function openFeature(feature) {
+
+    console.log("Opening feature:", feature);
+
+    /*
+       These names are intentionally kept simple.
+       Your existing AgriVision JavaScript can connect
+       its screens to these functions.
+    */
+
+    if (feature === "ndvi") {
+
+        if (typeof openNDVI === "function") {
+            openNDVI();
+        } else {
+            alert("NDVI Analysis");
+        }
+
+    }
+
+    else if (feature === "savi") {
+
+        if (typeof openSAVI === "function") {
+            openSAVI();
+        } else {
+            alert("SAVI Analysis");
+        }
+
+    }
+
+    else if (feature === "waterStress") {
+
+        if (typeof openWaterStress === "function") {
+            openWaterStress();
+        } else {
+            alert("Water Stress Analysis");
+        }
+
+    }
+
+    else if (feature === "cropDoctor") {
+        startCropDoctor();
+    }
+
+    else if (feature === "farmingGuide") {
+        openFarmingGuide();
+    }
+
+
+
+    else if (feature === "weather") {
+
+        if (typeof openWeather === "function") {
+            openWeather();
+        } else {
+            alert("Weather Forecast");
+        }
+
+    }
+
+    else if (feature === "fertilizer") {
+        alert("Fertilizer Calculator");
+    }
+
+    else if (feature === "pest") {
+        startCropDoctor();
+    }
+
+    else if (feature === "water") {
+        openFeature("waterStress");
+    }
+
+    else if (feature === "profile") {
+        alert("Farmer Profile");
+    }
+
+}
+
+
+/* CROP DOCTOR */
+
+function startCropDoctor() {
+
+    if (typeof openCropDoctor === "function") {
+        openCropDoctor();
+        return;
+    }
+
+    alert(
+        "Crop Doctor\n\n" +
+        "Selected crop: " + selectedCrop +
+        "\n\nCamera diagnosis will open here."
+    );
+
+}
+
+
+/* VOICE ASSISTANT */
+
+function startVoiceAssistant() {
+
+    if ("speechSynthesis" in window) {
+
+        const message =
+            "Welcome to AgriVision. " +
+            "Your selected crop is " +
+            selectedCrop +
+            ". How can I help you today?";
+
+        const speech =
+            new SpeechSynthesisUtterance(message);
+
+        speech.lang = "en-IN";
+
+        window.speechSynthesis.speak(speech);
+
+    } else {
+
+        alert("Voice assistance is not supported in this browser.");
+
+    }
+
+}
+
+
+/* LANGUAGE */
+
+function changeLanguage() {
+
+    alert(
+        "Language selection\n\n" +
+        "English / తెలుగు"
+    );
+
+}
+
+
+/* HOME */
+
+function goHome() {
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+/* ================= FARMING GUIDE ================= */
+
+function openFarmingGuide() {
+
+    const home = document.querySelector("main");
+    const guide = document.getElementById("farmingGuideScreen");
+
+    if (!guide) {
+        console.error("Farming Guide screen not found.");
+        return;
+    }
+
+    if (home) {
+        home.style.display = "none";
+    }
+
+    guide.style.display = "block";
+    guide.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+
+}
+
+
+function closeFarmingGuide() {
+
+    const guide =
+        document.getElementById("farmingGuideScreen");
+
+    if (guide) {
+        guide.style.display = "none";
+    }
+
+    const home = document.querySelector("main");
+
+    if (home) {
+        home.style.display = "block";
+    }
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+
+function showGuide(crop) {
+
+    const result =
+        document.getElementById("guideResult");
+
+    const guides = {
+
+        Jasmine: {
+            icon: "🌼",
+            steps: [
+                "Land preparation",
+                "Plant healthy jasmine cuttings",
+                "Provide proper irrigation",
+                "Apply recommended fertilizers",
+                "Monitor pests and diseases",
+                "Prune plants at the proper stage",
+                "Harvest flowers regularly"
+            ]
+        },
+
+        Paddy: {
+            icon: "🌾",
+            steps: [
+                "Prepare and level the field",
+                "Select healthy seed",
+                "Raise nursery seedlings",
+                "Transplant seedlings",
+                "Maintain proper water level",
+                "Apply fertilizers at recommended stages",
+                "Monitor pests and diseases",
+                "Harvest when grains mature"
+            ]
+        },
+
+        Groundnut: {
+            icon: "🥜",
+            steps: [
+                "Prepare loose and well-drained soil",
+                "Select healthy seeds",
+                "Sow at recommended spacing",
+                "Maintain soil moisture",
+                "Apply nutrients at proper stages",
+                "Monitor leaf diseases and pests",
+                "Avoid excess irrigation",
+                "Harvest when pods mature"
+            ]
+        },
+
+        Chilli: {
+            icon: "🌶️",
+            steps: [
+                "Prepare well-drained soil",
+                "Raise healthy seedlings",
+                "Transplant at proper spacing",
+                "Maintain adequate moisture",
+                "Apply fertilizers in stages",
+                "Monitor thrips and other pests",
+                "Check for fungal diseases",
+                "Harvest mature green or red chilli"
+            ]
+        },
+
+        Onion: {
+            icon: "🧅",
+            steps: [
+                "Prepare fine and well-drained soil",
+                "Raise healthy seedlings",
+                "Transplant seedlings",
+                "Provide regular irrigation",
+                "Apply nutrients at proper stages",
+                "Monitor thrips and diseases",
+                "Reduce irrigation near maturity",
+                "Harvest after bulb maturity"
+            ]
+        }
+
+    };
+
+    const data = guides[crop];
+
+    if (!data) return;
+
+    result.innerHTML = `
+
+        <h2 style="color:#24752b;">
+            ${data.icon} ${crop} Farming Guide
+        </h2>
+
+        <p style="color:#667085;">
+            Follow these major steps during crop production.
+        </p>
+
+        <div style="
+            display:flex;
+            flex-direction:column;
+            gap:12px;
+            margin-top:20px;
+        ">
+
+            ${data.steps.map((step, index) => `
+
+                <div style="
+                    display:flex;
+                    align-items:center;
+                    gap:15px;
+                    padding:15px;
+                    background:#f3f8f3;
+                    border-radius:14px;
+                ">
+
+                    <div style="
+                        min-width:35px;
+                        height:35px;
+                        border-radius:50%;
+                        background:#2e7d32;
+                        color:white;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        font-weight:bold;
+                    ">
+                        ${index + 1}
+                    </div>
+
+                    <div>
+                        ${step}
+                    </div>
+
+                </div>
+
+            `).join("")}
+
+        </div>
+
+    `;
+
+}
+</script>
+
+</body>
+</html>
