@@ -511,16 +511,6 @@
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             gap: 16px;
         }
-        .marketplace-toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; margin:16px 0; }
-        .marketplace-auth, .marketplace-list-form { background:#f7fbf6; border:1px solid var(--border); border-radius:14px; padding:18px; margin:16px 0; }
-        .marketplace-auth-grid, .marketplace-form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; }
-        .marketplace-auth input, .marketplace-auth select, .marketplace-list-form input, .marketplace-list-form select { width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid #ccd8cc; border-radius:9px; background:#fff; }
-        .marketplace-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
-        .marketplace-status { margin-top:10px; font-size:.92rem; }
-        .marketplace-card-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
-        .marketplace-card-actions a { text-decoration:none; }
-        .marketplace-role-badge { display:inline-block; padding:5px 9px; border-radius:999px; background:#e8f5e9; color:#236b2c; font-size:.82rem; font-weight:700; }
-        @media (max-width:650px) { .marketplace-toolbar { align-items:stretch; } }
 
         .listing-card {
             border: 1px solid var(--border);
@@ -1607,64 +1597,34 @@
             >
                 <div class="module">
                     <h2 data-i18n="marketplace">Farmer–Buyer Marketplace</h2>
-                    <p>Direct farmer-to-buyer marketplace: farmers can list produce, buyers can discover available lots and contact sellers directly.</p>
 
-                    <div class="marketplace-toolbar">
-                        <span id="marketplaceAccountBadge" class="marketplace-role-badge">Browsing as guest</span>
-                        <div class="button-row">
-                            <button class="btn" type="button" onclick="loadMarketplace()">Refresh Listings</button>
-                            <button class="btn secondary" type="button" onclick="showMarketplaceAuth()">Account</button>
-                        </div>
+                    <p data-i18n="marketplace_intro">
+                        View available produce from farmers and contact them directly.
+                        In a future version, authenticated farmers will be able to
+                        create new listings.
+                    </p>
+
+                    <div class="button-row">
+                        <button
+                            class="btn"
+                            type="button"
+                            onclick="loadMarketplace()"
+                        >
+                            Refresh Listings
+                        </button>
                     </div>
 
-                    <div id="marketplaceAuth" class="marketplace-auth hidden">
-                        <h3>Marketplace Account</h3>
-                        <p class="note">Create a farmer or buyer account, then log in to use marketplace actions. Your account is stored in the AgriVision database.</p>
-                        <div class="marketplace-auth-grid">
-                            <input id="mpName" type="text" placeholder="Full name (registration)">
-                            <input id="mpEmail" type="email" placeholder="Email address">
-                            <input id="mpPhone" type="tel" placeholder="Phone number (registration)">
-                            <input id="mpPassword" type="password" placeholder="Password (min 8 characters)">
-                            <select id="mpRole">
-                                <option value="farmer">Farmer / Seller</option>
-                                <option value="buyer">Buyer</option>
-                            </select>
-                        </div>
-                        <div class="marketplace-actions">
-                            <button class="btn" type="button" onclick="marketplaceRegister()">Create Account</button>
-                            <button class="btn" type="button" onclick="marketplaceLogin()">Login</button>
-                            <button class="btn secondary" type="button" onclick="marketplaceLogout()">Logout</button>
-                        </div>
-                        <div id="marketplaceAuthStatus" class="marketplace-status"></div>
+                    <div
+                        id="marketplaceResult"
+                        class="result"
+                    >
+                        Loading marketplace listings...
                     </div>
 
-                    <div id="marketplaceSellerForm" class="marketplace-list-form hidden">
-                        <h3>🌾 List Your Produce</h3>
-                        <div class="marketplace-form-grid">
-                            <select id="mpCrop">
-                                <option value="Rice">🌾 Rice</option>
-                                <option value="Jasmine">🌼 Jasmine</option>
-                                <option value="Groundnut">🥜 Groundnut</option>
-                                <option value="Chilli">🌶️ Chilli</option>
-                            </select>
-                            <input id="mpVariety" type="text" placeholder="Variety (optional)">
-                            <input id="mpQuantity" type="number" min="1" step="0.1" placeholder="Quantity (kg)">
-                            <input id="mpPrice" type="number" min="0.01" step="0.01" placeholder="Expected price (₹/kg)">
-                            <input id="mpVillage" type="text" placeholder="Village (optional)">
-                            <input id="mpDistrict" type="text" placeholder="District">
-                            <input id="mpState" type="text" value="Andhra Pradesh" placeholder="State">
-                            <input id="mpContactName" type="text" placeholder="Contact name">
-                            <input id="mpContactPhone" type="tel" placeholder="Contact phone">
-                            <input id="mpHarvestDate" type="date" placeholder="Expected harvest date">
-                        </div>
-                        <div class="marketplace-actions">
-                            <button class="btn" type="button" onclick="createMarketplaceListing()">Publish Produce</button>
-                        </div>
-                        <div id="marketplaceListingStatus" class="marketplace-status"></div>
-                    </div>
-
-                    <div id="marketplaceResult" class="result">Loading marketplace listings...</div>
-                    <div id="marketplaceGrid" class="marketplace-grid"></div>
+                    <div
+                        id="marketplaceGrid"
+                        class="marketplace-grid"
+                    ></div>
                 </div>
             </div>
 
@@ -1852,7 +1812,7 @@
         // Crop Doctor and all AgriVision APIs are served by Flask on port 5000.
         // Keep the API target fixed so opening index.html through VS Code Live Server
         // (or another static server) does not send POST requests to that server.
-        const API = "http://127.0.0.1:5000";
+        const API = window.location.origin;
 
         let indicesMap = null;
         let indicesDrawnItems = null;
@@ -3451,196 +3411,130 @@
             }
         }
 
-        function marketplaceToken() {
-            return localStorage.getItem("agrivisionToken") || "";
-        }
-
-        function showMarketplaceAuth() {
-            const box = getElement("marketplaceAuth");
-            if (box) box.classList.toggle("hidden");
-        }
-
-        function setMarketplaceStatus(message, isError=false) {
-            const el = getElement("marketplaceAuthStatus");
-            if (!el) return;
-            el.textContent = message;
-            el.style.color = isError ? "#b3261e" : "#2e7d32";
-        }
-
-        function updateMarketplaceAccountUI(user) {
-            const badge = getElement("marketplaceAccountBadge");
-            const sellerForm = getElement("marketplaceSellerForm");
-            if (!badge) return;
-            if (!user) {
-                badge.textContent = "Browsing as guest";
-                if (sellerForm) sellerForm.classList.add("hidden");
-                return;
-            }
-            badge.textContent = `${user.name || "User"} • ${user.role === "farmer" ? "Farmer / Seller" : "Buyer"}`;
-            if (sellerForm) sellerForm.classList.toggle("hidden", user.role !== "farmer");
-        }
-
-        async function marketplaceRegister() {
-            const payload = {
-                name: getElement("mpName").value.trim(),
-                email: getElement("mpEmail").value.trim(),
-                phone: getElement("mpPhone").value.trim(),
-                password: getElement("mpPassword").value,
-                role: getElement("mpRole").value,
-                language: currentLanguage || "en"
-            };
-            if (!payload.name || !payload.email || !payload.password) {
-                setMarketplaceStatus("Please enter name, email and password.", true);
-                return;
-            }
-            try {
-                const response = await fetch(API + "/api/auth/register", {
-                    method: "POST",
-                    headers: {"Content-Type":"application/json"},
-                    body: JSON.stringify(payload)
-                });
-                const data = await response.json();
-                if (!response.ok || !data.success) throw new Error(data.error || "Registration failed.");
-                setMarketplaceStatus("Account created successfully. You can now log in.");
-            } catch (error) {
-                setMarketplaceStatus("Registration error: " + error.message, true);
-            }
-        }
-
-        async function marketplaceLogin() {
-            const email = getElement("mpEmail").value.trim();
-            const password = getElement("mpPassword").value;
-            if (!email || !password) {
-                setMarketplaceStatus("Enter your email and password.", true);
-                return;
-            }
-            try {
-                const response = await fetch(API + "/api/auth/login", {
-                    method: "POST",
-                    headers: {"Content-Type":"application/json"},
-                    body: JSON.stringify({email, password})
-                });
-                const data = await response.json();
-                if (!response.ok || !data.success) throw new Error(data.error || "Login failed.");
-                localStorage.setItem("agrivisionToken", data.access_token);
-                localStorage.setItem("agrivisionUser", JSON.stringify(data.user));
-                updateMarketplaceAccountUI(data.user);
-                setMarketplaceStatus(`Logged in as ${data.user.name} (${data.user.role}).`);
-                if (data.user.role === "farmer") {
-                    getElement("mpContactName").value = data.user.name || "";
-                    getElement("mpContactPhone").value = data.user.phone || "";
-                }
-                loadMarketplace();
-            } catch (error) {
-                setMarketplaceStatus("Login error: " + error.message, true);
-            }
-        }
-
-        function marketplaceLogout() {
-            localStorage.removeItem("agrivisionToken");
-            localStorage.removeItem("agrivisionUser");
-            updateMarketplaceAccountUI(null);
-            setMarketplaceStatus("Logged out. You can still browse active listings.");
-        }
-
-        async function createMarketplaceListing() {
-            const token = marketplaceToken();
-            if (!token) {
-                setMarketplaceStatus("Please log in as a farmer before publishing produce.", true);
-                showMarketplaceAuth();
-                return;
-            }
-            const payload = {
-                crop: getElement("mpCrop").value,
-                variety: getElement("mpVariety").value.trim(),
-                quantity_kg: getElement("mpQuantity").value,
-                price_per_kg: getElement("mpPrice").value,
-                district: getElement("mpDistrict").value.trim(),
-                state: getElement("mpState").value.trim(),
-                contact_name: getElement("mpContactName").value.trim(),
-                contact_phone: getElement("mpContactPhone").value.trim(),
-                harvest_date: getElement("mpHarvestDate").value || null
-            };
-            if (!payload.quantity_kg || !payload.price_per_kg || !payload.district || !payload.state || !payload.contact_name || !payload.contact_phone) {
-                const status = getElement("marketplaceListingStatus");
-                status.textContent = "Please fill quantity, price, district, state and contact details.";
-                status.style.color = "#b3261e";
-                return;
-            }
-            try {
-                const response = await fetch(API + "/api/market/listings", {
-                    method: "POST",
-                    headers: {"Content-Type":"application/json", "Authorization":"Bearer " + token},
-                    body: JSON.stringify(payload)
-                });
-                const data = await response.json();
-                if (!response.ok || !data.success) throw new Error(data.error || "Could not publish listing.");
-                const status = getElement("marketplaceListingStatus");
-                status.textContent = "✅ Produce listing published successfully.";
-                status.style.color = "#2e7d32";
-                getElement("mpQuantity").value = "";
-                getElement("mpPrice").value = "";
-                getElement("mpVariety").value = "";
-                loadMarketplace();
-                speak("Your produce listing has been published successfully.");
-            } catch (error) {
-                const status = getElement("marketplaceListingStatus");
-                status.textContent = "Listing error: " + error.message;
-                status.style.color = "#b3261e";
-            }
-        }
-
         async function loadMarketplace() {
-            const result = getElement("marketplaceResult");
-            const grid = getElement("marketplaceGrid");
-            showLoading(result, "Loading marketplace listings...");
+            const result =
+                getElement("marketplaceResult");
+
+            const grid =
+                getElement("marketplaceGrid");
+
+            showLoading(
+                result,
+                "Loading marketplace listings..."
+            );
+
             grid.innerHTML = "";
+
             try {
-                const response = await fetch(API + "/api/market/listings", {cache:"no-store"});
+                const response = await fetch(
+                    API + "/api/market/listings"
+                );
+
                 const data = await response.json();
-                if (!response.ok || !data.success) throw new Error(data.error || "Could not load marketplace listings.");
-                const listings = data.listings || [];
+
+                if (!response.ok || !data.success) {
+                    throw new Error(
+                        data.error ||
+                        "Could not load marketplace listings."
+                    );
+                }
+
+                const listings =
+                    data.listings || [];
+
                 if (!listings.length) {
-                    result.textContent = "No active marketplace listings yet. Farmers can log in and publish their produce here.";
+                    result.textContent =
+                        "No active marketplace listings found.";
                     return;
                 }
-                result.textContent = `${listings.length} active marketplace listing${listings.length === 1 ? "" : "s"}.`;
+
+                result.textContent =
+                    "Active marketplace listings:";
                 speakFeatureResult("marketplace", data);
+
                 listings.forEach(listing => {
                     const card = document.createElement("div");
                     card.className = "listing-card";
-                    const phone = String(listing.contact_phone || "").replace(/[^0-9+]/g, "");
+
                     card.innerHTML = `
-                        <h4>${escapeHTML(listing.crop || "Produce")}</h4>
-                        ${listing.variety ? `<p class="note"><strong>Variety:</strong> ${escapeHTML(listing.variety)}</p>` : ""}
-                        <div class="detail-row"><span class="detail-label">Quantity:</span><span class="detail-value">${safeNumber(listing.quantity_kg, 0)} kg</span></div>
-                        <div class="detail-row"><span class="detail-label">Expected price:</span><span class="detail-value">₹${safeNumber(listing.price_per_kg, 1)} / kg</span></div>
-                        <div class="detail-row"><span class="detail-label">Location:</span><span class="detail-value">${escapeHTML(listing.district || "")} , ${escapeHTML(listing.state || "")}</span></div>
-                        <div class="detail-row"><span class="detail-label">Farmer:</span><span class="detail-value">${escapeHTML(listing.farmer_name || listing.contact_name || "Farmer")}</span></div>
-                        ${listing.harvest_date ? `<div class="detail-row"><span class="detail-label">Harvest:</span><span class="detail-value">${escapeHTML(listing.harvest_date)}</span></div>` : ""}
-                        <div class="marketplace-card-actions">
-                            ${phone ? `<a class="btn" href="tel:${phone}">📞 Contact Farmer</a>` : ""}
+                        <h4>
+                            ${escapeHTML(listing.crop)}
+                        </h4>
+
+                        <div class="detail-row">
+                            <span class="detail-label">
+                                Quantity:
+                            </span>
+                            <span class="detail-value">
+                                ${safeNumber(listing.quantity_kg, 0)} kg
+                            </span>
                         </div>
-                        <p class="note">Direct farmer listing • Verify quality, quantity and final price before purchase.</p>
+
+                        <div class="detail-row">
+                            <span class="detail-label">
+                                Price:
+                            </span>
+                            <span class="detail-value">
+                                ₹${safeNumber(listing.price_per_kg, 1)} / kg
+                            </span>
+                        </div>
+
+                        <div class="detail-row">
+                            <span class="detail-label">
+                                District:
+                            </span>
+                            <span class="detail-value">
+                                ${escapeHTML(listing.district)}
+                            </span>
+                        </div>
+
+                        <div class="detail-row">
+                            <span class="detail-label">
+                                State:
+                            </span>
+                            <span class="detail-value">
+                                ${escapeHTML(listing.state)}
+                            </span>
+                        </div>
+
+                        <div class="detail-row">
+                            <span class="detail-label">
+                                Farmer:
+                            </span>
+                            <span class="detail-value">
+                                ${escapeHTML(listing.farmer_name)}
+                            </span>
+                        </div>
+
+                        <div class="detail-row">
+                            <span class="detail-label">
+                                Contact:
+                            </span>
+                            <span class="detail-value">
+                                ${escapeHTML(listing.contact_phone)}
+                            </span>
+                        </div>
+
+                        <hr>
+
+                        <p class="note">
+                            ${escapeHTML(listing.village || "")}
+                            ${listing.village ? "•" : ""}
+                            ${escapeHTML(listing.farmer_district || "")}
+                        </p>
                     `;
+
                     grid.appendChild(card);
                 });
             } catch (error) {
                 const message = String(error?.message || error || "Marketplace request failed.");
-                showError(result, message.toLowerCase().includes("failed to fetch") ? "Marketplace backend is not reachable. Start AgriVision_app.py and keep Flask running." : "Marketplace error: " + message);
-            }
-        }
-
-        function initializeMarketplaceAccount() {
-            try {
-                const user = JSON.parse(localStorage.getItem("agrivisionUser") || "null");
-                updateMarketplaceAccountUI(user);
-                if (user && user.role === "farmer") {
-                    if (getElement("mpContactName")) getElement("mpContactName").value = user.name || "";
-                    if (getElement("mpContactPhone")) getElement("mpContactPhone").value = user.phone || "";
-                }
-            } catch (_) {
-                updateMarketplaceAccountUI(null);
+                const networkFailure = message.toLowerCase().includes("failed to fetch") || message.toLowerCase().includes("networkerror");
+                showError(
+                    result,
+                    networkFailure
+                        ? "Marketplace backend is not reachable. Start AgriVision_app.py and keep Flask running."
+                        : "Marketplace error: " + message
+                );
             }
         }
 
@@ -4311,4 +4205,3 @@
 </script>
 </body>
 </html>
-<script>document.addEventListener("DOMContentLoaded", initializeMarketplaceAccount);</script>
