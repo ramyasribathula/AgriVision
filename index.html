@@ -1816,7 +1816,7 @@
         // Crop Doctor and all AgriVision APIs are served by Flask on port 5000.
         // Keep the API target fixed so opening index.html through VS Code Live Server
         // (or another static server) does not send POST requests to that server.
-        const API = "http://127.0.0.1:5000";
+        const API = window.location.origin;
 
         let indicesMap = null;
         let indicesDrawnItems = null;
