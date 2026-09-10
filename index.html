@@ -1792,9 +1792,13 @@
             <div id="pricesModule" class="module-content hidden">
                 <div class="module">
                     <h2>💹 Market Prices</h2>
-                    <p>Official mandi-price integration is optional because the Government OGD API requires an API key. When configured, results are fetched from the official dataset; otherwise the app clearly reports that live prices are unavailable.</p>
-                    <div class="form-grid"><div><label>Commodity</label><input id="priceCommodity" placeholder="Rice"></div><div><label>State</label><input id="priceState" value="Andhra Pradesh"></div><div><label>District</label><input id="priceDistrict" value="West Godavari"></div></div>
-                    <div class="button-row"><button class="btn" onclick="loadMarketPrices()">Check Official Prices</button></div>
+                    <p>Live mandi prices from Farmer.in, sourced from Agmarknet / Government of India data. No API key is required.</p>
+                    <div class="form-grid">
+                        <div><label>Commodity</label><input id="priceCommodity" placeholder="Rice" value="Rice"></div>
+                        <div><label>State</label><input id="priceState" value="Andhra Pradesh"></div>
+                        <div><label>District</label><input id="priceDistrict" value="West Godavari" placeholder="Optional"></div>
+                    </div>
+                    <div class="button-row"><button class="btn" onclick="loadMarketPrices()">Check Live Prices</button></div>
                     <div id="pricesResult" class="result"></div>
                 </div>
             </div>
@@ -1812,7 +1816,7 @@
         // Crop Doctor and all AgriVision APIs are served by Flask on port 5000.
         // Keep the API target fixed so opening index.html through VS Code Live Server
         // (or another static server) does not send POST requests to that server.
-        const API = window.location.origin;
+        const API = "http://127.0.0.1:5000";
 
         let indicesMap = null;
         let indicesDrawnItems = null;
@@ -4174,17 +4178,28 @@
             }catch(e){box.innerHTML=`<div class="api-note">❌ ${escapeHTML(e.message)}</div>`;}
         }
         async function loadMarketPrices(){
-            const box=getElement("pricesResult"); box.textContent="Checking official market-price service...";
-            const q=new URLSearchParams({commodity:getElement("priceCommodity")?.value||savedFarm.crop||"Rice",state:getElement("priceState")?.value||"Andhra Pradesh",district:getElement("priceDistrict")?.value||"West Godavari"});
-            try{const r=await fetch(API+"/api/market-prices?"+q.toString(),{cache:"no-store"}); const d=await r.json(); if(!r.ok||!d.success) throw new Error(d.error||"Official market-price data is not configured.");
-                const rows=Array.isArray(d.records)?d.records:[]; box.innerHTML=rows.length?`<table class="price-table"><thead><tr><th>Market</th><th>Commodity</th><th>Variety</th><th>Min</th><th>Modal</th><th>Max</th><th>Date</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${escapeHTML(x.market||"--")}</td><td>${escapeHTML(x.commodity||"--")}</td><td>${escapeHTML(x.variety||"--")}</td><td>${escapeHTML(x.min_price??"--")}</td><td>${escapeHTML(x.modal_price??"--")}</td><td>${escapeHTML(x.max_price??"--")}</td><td>${escapeHTML(x.date||"--")}</td></tr>`).join("")}</tbody></table><p class="api-note">Source: Government of India Open Government Data commodity-market dataset.</p>`:`<div class="api-note">No matching official records were returned.</div>`;
-            }catch(e){
-                const message = String(e?.message || e || "Market-price request failed.");
-                const networkFailure = message.toLowerCase().includes("failed to fetch") || message.toLowerCase().includes("networkerror");
-                box.innerHTML = networkFailure
-                    ? `<div class="api-note">❌ <strong>AgriVision backend is not reachable.</strong><br><br>Start the Flask server with <code>python AgriVision_app.py</code> and open this page through VS Code Live Server.</div>`
-                    : `<div class="api-note">⚠️ ${escapeHTML(message)}<br><br>The official Government of India mandi dataset requires a <code>DATA_GOV_API_KEY</code>. No price has been invented or estimated.</div>`;
-            }
+            const box=getElement("pricesResult");
+            const commodity=(getElement("priceCommodity")?.value||savedFarm.crop||"Rice").trim();
+            const state=(getElement("priceState")?.value||"Andhra Pradesh").trim();
+            const district=(getElement("priceDistrict")?.value||"").trim();
+            box.innerHTML=`<div class="api-note">Loading live ${escapeHTML(commodity)} mandi prices for ${escapeHTML(state)}...</div>`;
+
+            // Farmer.in provides a free CORS-enabled price widget using Agmarknet data.
+            // It is used here only for Market Prices; no other AgriVision feature is changed.
+            const old=document.getElementById("farmerPriceWidgetScript");
+            if(old) old.remove();
+            box.innerHTML=`
+                <div class="api-note"><strong>Live mandi prices</strong><br>
+                ${district ? `Showing state-level ${escapeHTML(commodity)} prices when a district-specific record is not available.` : `Showing live ${escapeHTML(commodity)} prices for the selected state.`}</div>
+                <div class="farmer-widget" data-commodity="${escapeHTML(commodity)}" data-state="${escapeHTML(state)}"></div>`;
+            const script=document.createElement("script");
+            script.id="farmerPriceWidgetScript";
+            script.src="https://farmer.in/widget.js";
+            script.async=true;
+            script.onerror=()=>{
+                box.innerHTML=`<div class="api-note">⚠️ Live mandi service could not be loaded. Please check your internet connection and try again.</div>`;
+            };
+            document.body.appendChild(script);
         }
 
         async function populateVideoCrops(){

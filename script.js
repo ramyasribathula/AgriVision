@@ -1204,7 +1204,7 @@ async function getNDVILocation() {
             "📍 Location detected. Analyzing satellite data...";
 
         const response = await fetch(
-            "http://127.0.0.1:5000/api/ndvi" +
+            window.location.origin + "/api/ndvi" +
             "?lat=" + latitude +
             "&lon=" + longitude
         );
@@ -1765,7 +1765,7 @@ if (boundaryStatus) {
 
 
 fetch(
-    "http://127.0.0.1:5000/api/ndvi/boundary",
+    window.location.origin + "/api/ndvi/boundary",
     {
 
         method: "POST",
@@ -2287,7 +2287,7 @@ fetch(
    AGRIVISION - FINAL WEATHER + CALENDAR + CROP DOCTOR
    ============================================================ */
 
-const AGRIVISION_API = "http://127.0.0.1:5000";
+const AGRIVISION_API = window.location.origin;
 
 
 /* ============================================================
