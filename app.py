@@ -1263,13 +1263,27 @@ def indices_api():
         geometry, geometry_type, area_hectares = ee_farm_geometry(payload, lat, lon)
         end_date = datetime.now(timezone.utc).date()
         start_date = end_date - timedelta(days=max(SATELLITE_LOOKBACK_DAYS, 60))
-        collection = ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED").filterBounds(geometry).filterDate(str(start_date), str(end_date + timedelta(days=1))).filter(ee.Filter.lt("CLOUDY_PIXEL_PERCENTAGE", 90)).map(mask_sentinel2)
+        collection = (
+            ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
+            .filterBounds(geometry)
+            .filterDate(str(start_date), str(end_date + timedelta(days=1)))
+            .filter(ee.Filter.lt("CLOUDY_PIXEL_PERCENTAGE", 80))
+            .map(mask_sentinel2)
+            .map(add_ndvi)
+            .map(lambda img: add_valid_count(img, geometry))
+            .filter(ee.Filter.gt("agrivision_valid_pixels", 0))
+        )
         image_count = collection.size().getInfo()
         if not image_count:
-            return api_error("No Sentinel-2 scene was found for the selected farm and period. Try again later or check the farm boundary.",404)
+            return api_error(
+                "No usable Sentinel-2 pixels were found inside the selected farm in the recent observation window. "
+                "The latest scene may be cloud-covered. Try again later or use a slightly different boundary.",
+                404
+            )
 
-        # Work with the most recent scene that intersects the farm.
-        # The reduceRegion step below verifies that the selected scene has usable pixels.
+        # Select the most recent scene that has at least some valid pixels
+        # inside the actual farm boundary. This prevents a cloudy latest scene
+        # from being selected when an earlier usable scene is available.
         image = ee.Image(collection.sort("system:time_start", False).first())
         scaled = image.select(["B2","B4","B8","B11"]).multiply(0.0001)
         ndvi = scaled.normalizedDifference(["B8","B4"]).rename("NDVI")
@@ -1358,7 +1372,38 @@ def indices_api():
 
         rgb=image.visualize(bands=["B4","B3","B2"],min=0,max=3000,gamma=1.1)
         rgb_id=rgb.getMapId({})
-        return jsonify({"success":True,"source":"Sentinel-2 Surface Reflectance Harmonized via Google Earth Engine","resolution_m":10,"geometry_type":geometry_type,"farm_area_hectares":area_hectares,"sensing_date":image.date().format("YYYY-MM-dd").getInfo(),"image_count":image_count,"indices":{"ndvi":vals["NDVI"],"evi":vals["EVI"],"savi":vals["SAVI"],"ndwi":vals["NDWI"]},"classification":classification,"tile_url":rgb_id["tile_fetcher"].url_format,"classification_map_tile_url":class_id["tile_fetcher"].url_format,"classification_summary":classification_summary,"classification_type":"vegetation_and_surface","date_range":{"start":str(start_date),"end":str(end_date)},"disclaimer":"Indices and map classification are satellite indicators. This classification is not crop-species identification. Confirm farm decisions with field observations and soil information."})
+
+        # Create individual interactive map layers from the SAME Sentinel-2 scene.
+        # Farmers can switch NDVI/EVI/SAVI/NDWI on the existing Leaflet map.
+        index_map_specs = {
+            "ndvi": {
+                "image": ndvi,
+                "min": -0.20, "max": 0.90,
+                "palette": ["#d73027", "#fee08b", "#66bd63", "#1a9850"]
+            },
+            "evi": {
+                "image": evi,
+                "min": -0.10, "max": 0.80,
+                "palette": ["#d73027", "#fdae61", "#a6d96a", "#1a9850"]
+            },
+            "savi": {
+                "image": savi,
+                "min": -0.10, "max": 0.80,
+                "palette": ["#d73027", "#fdae61", "#a6d96a", "#1a9850"]
+            },
+            "ndwi": {
+                "image": ndwi,
+                "min": -0.50, "max": 0.50,
+                "palette": ["#8c510a", "#f6e8c3", "#c7eae5", "#01665e"]
+            }
+        }
+        index_map_tiles = {}
+        for key, spec in index_map_specs.items():
+            viz = spec["image"].visualize(min=spec["min"], max=spec["max"], palette=spec["palette"])
+            tile_id = viz.getMapId({})
+            index_map_tiles[key] = tile_id["tile_fetcher"].url_format
+
+        return jsonify({"success":True,"source":"Sentinel-2 Surface Reflectance Harmonized via Google Earth Engine","resolution_m":10,"geometry_type":geometry_type,"farm_area_hectares":area_hectares,"sensing_date":image.date().format("YYYY-MM-dd").getInfo(),"image_count":image_count,"indices":{"ndvi":vals["NDVI"],"evi":vals["EVI"],"savi":vals["SAVI"],"ndwi":vals["NDWI"]},"classification":classification,"tile_url":rgb_id["tile_fetcher"].url_format,"index_map_tiles":index_map_tiles,"classification_map_tile_url":class_id["tile_fetcher"].url_format,"classification_summary":classification_summary,"classification_type":"vegetation_and_surface","date_range":{"start":str(start_date),"end":str(end_date)},"disclaimer":"Indices and map classification are satellite indicators. This classification is not crop-species identification. Confirm farm decisions with field observations and soil information."})
     except ValueError as error:
         return api_error(str(error),400)
     except Exception:
